@@ -3,12 +3,27 @@ const Transaction = require('../models/Transaction');
 // POST /api/transactions
 exports.createTransaction = async (req, res) => {
   try {
-    const { title, amount, type, category, date, note } = req.body;
+    const { username, title, amount, type, category, date, note } = req.body;
+    const user = (username || req.headers['x-username'] || '').trim();
 
-    if (!title || !amount || !type || !category || !date)
+    if (!user) {
+      return res.status(400).json({ message: 'Username is required to create a transaction' });
+    }
+
+    if (!title || !amount || !type || !category || !date) {
       return res.status(400).json({ message: 'Required fields missing' });
+    }
 
-    const transaction = await Transaction.create({ title, amount, type, category, date, note });
+    const transaction = await Transaction.create({
+      username: user,
+      title,
+      amount,
+      type,
+      category,
+      date,
+      note
+    });
+
     res.status(201).json(transaction);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -18,8 +33,13 @@ exports.createTransaction = async (req, res) => {
 // GET /api/transactions
 exports.getAllTransactions = async (req, res) => {
   try {
-    const { type, category, sort = 'date', order = 'desc' } = req.query;
+    const { username, type, category, sort = 'date', order = 'desc' } = req.query;
+    const user = (username || req.headers['x-username'] || '').trim();
+
     const filter = {};
+    if (user) {
+      filter.username = user;
+    }
     if (type) filter.type = type;
     if (category) filter.category = category;
 
@@ -34,9 +54,19 @@ exports.getAllTransactions = async (req, res) => {
 // GET /api/transactions/summary
 exports.getSummary = async (req, res) => {
   try {
-    const result = await Transaction.aggregate([
-      { $group: { _id: '$type', total: { $sum: '$amount' } } }
-    ]);
+    const { username } = req.query;
+    const user = (username || req.headers['x-username'] || '').trim();
+
+    const pipeline = [];
+    if (user) {
+      pipeline.push({ $match: { username: user } });
+    }
+
+    pipeline.push({
+      $group: { _id: '$type', total: { $sum: '$amount' } }
+    });
+
+    const result = await Transaction.aggregate(pipeline);
 
     let totalIncome = 0, totalExpense = 0;
     result.forEach(r => {

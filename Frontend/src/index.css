@@ -2,8 +2,35 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+:root {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color-scheme: dark;
+}
+
 body {
   min-height: 100vh;
+  background-color: #090a0e;
+  overflow-x: hidden;
+}
+
+/* Custom Matte Black & Orange Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #090a0e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e212d;
+  border-radius: 9999px;
+  border: 2px solid #090a0e;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d9703e;
 }
 
 @layer utilities {
@@ -13,23 +40,25 @@ body {
   }
   
   .animate-elegant-enter {
-    animation: elegantSlideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: elegantSlideDown 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  @keyframes warp3D {
-    0% {
-      transform: translateZ(-1000px) scale(0.5);
-      opacity: 0;
-    }
-    15% {
-      opacity: 1;
-    }
-    85% {
-      opacity: 1;
-    }
-    100% {
-      transform: translateZ(600px) scale(6);
-      opacity: 0;
-    }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
+  }
+
+  .animate-shake {
+    animation: shake 0.4s ease-in-out;
+  }
+
+  @keyframes scaleIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 }
